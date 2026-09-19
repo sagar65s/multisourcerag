@@ -71,15 +71,33 @@ Open `http://localhost:3000`. Backend liveness is available at `http://localhost
 1. On **Dashboard**, click **Create my collection**. A collection is a private folder for related sources and chats.
 2. Use **Chat → Smart chat** for normal questions—no collection required. If selected sources contain no matching evidence, Chat gives a clearly labelled general-knowledge answer instead of stopping at an empty response.
 3. In **Documents**, select your collection, upload files, and wait for **Ready**. Click the file's **Ask** button. Chat automatically selects that exact file; use **Answer from** to change it. You can ask for any available PDF page directly, such as `Explain page 42`.
-4. In **Websites**, choose the same collection, paste a public URL, and wait for **Ready**. Public Render cold starts and transient 429/503 responses are retried. Click its chat button to ask from that exact indexed site. For a public GitHub repository URL, MultiSource AI indexes the repository metadata, README, languages, license, statistics, and file list through GitHub's public API.
+4. In **Websites**, choose the same collection, paste either a full URL or a domain such as `chatgpt.com`, and wait for **Ready**. Public Render cold starts and transient 429/503 responses are retried. If a public site returns 403 or an anti-bot page, MultiSource AI does not bypass it: the source falls back to clearly labelled public search-visible summaries and official-domain links. Click its chat button to ask from that exact indexed source. For a public GitHub repository URL, MultiSource AI indexes repository metadata, README, languages, license, statistics, and its file tree through GitHub's public API.
 5. Use **Live web** in Chat for current facts, or **Research** for a longer cross-checked report. Completed research has a direct **Download PDF** button.
 6. The clearly labelled **Save** action under an answer adds it to **Saved**. Every conversation is automatically available in **History**. The search bar searches this history.
 
 A collection is only a private folder that groups related documents and websites; it is not a separate AI feature.
 
-Websites that require a login, explicitly disallow automated access, expose only a private network address, or enforce an interactive anti-bot challenge cannot be bypassed. For JavaScript-only public sites, set `ENABLE_PLAYWRIGHT_FALLBACK=true` and install the browser once with `playwright install chromium` inside the activated backend environment.
+Websites that require a login, explicitly disallow automated access, expose only a private network address, or enforce an interactive anti-bot challenge are never bypassed. When direct access is blocked, the website card says **public search** and answers are grounded in the indexed public summaries. For JavaScript-only public sites on a machine with enough memory, set `ENABLE_PLAYWRIGHT_FALLBACK=true` and install the browser once with `playwright install chromium` inside the activated backend environment.
 
 Public GitHub repositories work without a token within GitHub's anonymous API limits. If you analyze repositories frequently, create a read-only GitHub token and set `GITHUB_TOKEN` in `backend/.env`; never put that token in `frontend/.env.local`.
+
+## Render deployment
+
+Create separate Render Web Services with root directories `backend` and `frontend`.
+
+For a 512 MiB free backend, use the included lightweight dependency set. It intentionally omits local transformer models, Playwright, and test tools; document and website retrieval use the application's keyword/hash fallback instead of downloading CUDA packages.
+
+```text
+Backend root: backend
+Build: python -m pip install --upgrade pip && python -m pip install -r requirements-render.txt
+Start: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+Health check: /api/v1/health
+PYTHON_VERSION: 3.12.14
+WEB_CONCURRENCY: 1
+ENABLE_PLAYWRIGHT_FALLBACK: false
+```
+
+Use `requirements.txt` locally or on a larger CPU instance for transformer embeddings. Install CPU-only PyTorch before that file; never install CUDA wheels on a CPU Render service.
 
 ## MongoDB Atlas TLS/network behavior
 

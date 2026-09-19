@@ -39,7 +39,15 @@ async def process_website(owner_id: str, website_id: str, settings: Settings) ->
         except Exception as exc:
             logger.warning("website_vector_index_degraded", website_id=website_id, reason=type(exc).__name__)
         first = pages[0]; internal = sorted({link for page in pages for link in page.internal_links})[:100]; external = sorted({link for page in pages for link in page.external_links})[:100]; headings = list(dict.fromkeys(heading for page in pages for heading in page.headings))[:100]
-        await repository.set_status(owner_id, website_id, ProcessingStatus.COMPLETED, title=first.title, meta_description=first.meta_description, content_preview=build_content_preview(pages), indexed_pages=len(pages), chunk_count=len(chunks), important_headings=headings, internal_links=internal, external_links=external, error_message=None)
+        methods = {page.retrieval_method for page in pages}
+        analysis_method = "search_fallback" if "search_fallback" in methods else "github_api" if "github_api" in methods else "browser" if "browser" in methods else "direct"
+        notices = {
+            "search_fallback": "Direct access was blocked. This index uses public search-visible summaries and links.",
+            "github_api": "Indexed from GitHub's public API, repository metadata, file tree and README.",
+            "browser": "Indexed from a browser-rendered public page.",
+            "direct": None,
+        }
+        await repository.set_status(owner_id, website_id, ProcessingStatus.COMPLETED, title=first.title, meta_description=first.meta_description, content_preview=build_content_preview(pages), indexed_pages=len(pages), chunk_count=len(chunks), important_headings=headings, internal_links=internal, external_links=external, analysis_method=analysis_method, source_notice=notices[analysis_method], error_message=None)
     except Exception as exc:
         await repository.set_status(owner_id, website_id, ProcessingStatus.FAILED, error_message=(str(exc).strip() or "Could not analyze this website")[:240])
         raise

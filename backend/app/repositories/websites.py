@@ -18,7 +18,7 @@ class WebsiteRepository:
 
     @staticmethod
     def view(item: dict) -> WebsiteView:
-        return WebsiteView(id=str(item["_id"]), workspace_id=item["workspace_id"], url=item["url"], domain=item["domain"], title=item.get("title"), meta_description=item.get("meta_description"), content_preview=item.get("content_preview"), scope=item["scope"], status=item["status"], indexed_pages=item.get("indexed_pages", 0), chunk_count=item.get("chunk_count", 0), important_headings=item.get("important_headings", []), internal_links=item.get("internal_links", []), external_links=item.get("external_links", []), error_message=item.get("error_message"), created_at=item["created_at"], updated_at=item["updated_at"])
+        return WebsiteView(id=str(item["_id"]), workspace_id=item["workspace_id"], url=item["url"], domain=item["domain"], title=item.get("title"), meta_description=item.get("meta_description"), content_preview=item.get("content_preview"), scope=item["scope"], status=item["status"], indexed_pages=item.get("indexed_pages", 0), chunk_count=item.get("chunk_count", 0), important_headings=item.get("important_headings", []), internal_links=item.get("internal_links", []), external_links=item.get("external_links", []), error_message=item.get("error_message"), analysis_method=item.get("analysis_method", "direct"), source_notice=item.get("source_notice"), created_at=item["created_at"], updated_at=item["updated_at"])
 
     async def create(self, owner_id: str, payload: WebsiteCreate) -> WebsiteView:
         now = datetime.now(UTC); url = str(payload.url); normalized = normalize_url(url)

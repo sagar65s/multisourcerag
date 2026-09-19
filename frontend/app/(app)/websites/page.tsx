@@ -42,6 +42,11 @@ const labels: Record<string, string> = {
   failed: "Failed",
 };
 
+function withHttps(value: string) {
+  const compact = value.trim();
+  return compact && !compact.includes("://") ? `https://${compact}` : compact;
+}
+
 export default function WebsitesPage() {
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [workspaceId, setWorkspaceId] = useState("");
@@ -101,13 +106,13 @@ export default function WebsitesPage() {
     try {
       const item = await addWebsite({
         workspace_id: workspaceId,
-        url,
+        url: withHttps(url),
         scope,
         selected_urls:
           scope === "selected"
             ? selectedUrls
                 .split("\n")
-                .map((value) => value.trim())
+                .map(withHttps)
                 .filter(Boolean)
             : [],
         max_depth: scope === "full" ? maxDepth : 0,
@@ -191,11 +196,12 @@ export default function WebsitesPage() {
             <div className="url-field">
               <Globe2 size={19} />
               <input
-                type="url"
+                type="text"
+                inputMode="url"
                 value={url}
                 onChange={(event) => setUrl(event.target.value)}
                 required
-                placeholder="https://example.com"
+                placeholder="example.com or https://example.com"
                 aria-label="Website URL"
               />
             </div>
@@ -327,6 +333,12 @@ export default function WebsitesPage() {
                           <span>{item.chunk_count} chunks</span>
                         )}
                         <span>{item.scope}</span>
+                        {item.analysis_method === "search_fallback" && (
+                          <span>public search</span>
+                        )}
+                        {item.analysis_method === "github_api" && (
+                          <span>GitHub API</span>
+                        )}
                       </div>
                       <div className={`processing-state ${item.status}`}>
                         <i>
@@ -342,6 +354,11 @@ export default function WebsitesPage() {
                       </div>
                       {item.error_message && (
                         <small>{item.error_message}</small>
+                      )}
+                      {item.source_notice && (
+                        <small className="website-source-notice">
+                          {item.source_notice}
+                        </small>
                       )}
                       {item.status === "completed" &&
                         item.important_headings.length > 0 && (

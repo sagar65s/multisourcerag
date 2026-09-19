@@ -15,6 +15,7 @@ class ExtractedWebPage:
     internal_links: list[str] = field(default_factory=list)
     external_links: list[str] = field(default_factory=list)
     published_at: str | None = None
+    retrieval_method: str = "direct"
 
 
 def build_content_preview(pages: list[ExtractedWebPage], limit: int = 1400) -> str:

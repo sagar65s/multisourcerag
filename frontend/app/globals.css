@@ -5055,19 +5055,19 @@ select {
   min-width: 0;
 }
 .website-main > span {
-  font-size: 8px;
+  font-size: 11px;
   color: var(--primary);
   font-weight: 800;
 }
 .website-main h3 {
-  font-size: 11px;
+  font-size: 14px;
   margin: 4px 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .website-main > p {
-  font-size: 8px;
+  font-size: 11px;
   color: var(--muted);
   line-height: 1.5;
   margin: 4px 0;
@@ -5078,9 +5078,17 @@ select {
 }
 .website-main > small {
   display: block;
-  font-size: 8px;
+  font-size: 10px;
   color: var(--danger);
   margin-top: 5px;
+}
+.website-main > small.website-source-notice {
+  padding: 7px 9px;
+  border: 1px solid color-mix(in srgb, var(--warning) 30%, var(--line));
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--warning) 8%, transparent);
+  color: var(--text);
+  line-height: 1.45;
 }
 .website-meta {
   display: flex;
@@ -5094,7 +5102,7 @@ select {
   border-radius: 8px;
   background: color-mix(in srgb, var(--primary) 6%, transparent);
   color: var(--muted);
-  font-size: 7px;
+  font-size: 9px;
 }
 .heading-chips {
   display: flex;

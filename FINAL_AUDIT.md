@@ -1,6 +1,14 @@
 # MultiSource AI final audit
 
-Verified release audit date: 2026-09-16
+Verified release audit date: 2026-09-19
+
+## 2026-09-19 protected-website and Render update
+
+Website ingestion now has three bounded, transparent layers: direct secure fetch, optional browser rendering, and a public-search discovery fallback. A public page that returns HTTP 403/429/503 no longer becomes an automatic failed source when relevant search-visible information is available. The fallback does not bypass access controls; each indexed passage explicitly says that it came from an official-domain or related public search result, and the website UI labels the source method.
+
+Domain-only input such as `chatgpt.com` is normalized to HTTPS. Public GitHub repositories continue through the dedicated GitHub API path and are labelled separately from generic website crawling. A missing `json`/`os` import in the configurable search-provider registry was also corrected, removing a runtime-only failure that affected research and the new fallback path.
+
+Render deployment now includes `backend/.python-version` and `backend/requirements-render.txt`. The lightweight deployment set omits CUDA/PyTorch, Playwright, and test-only dependencies so a 512 MiB test instance does not install multi-gigabyte GPU packages. Full local transformer dependencies remain available in `requirements.txt`.
 
 ## 2026-09-16 source-grounding update
 
@@ -16,7 +24,7 @@ Release decision: **the application code and local packaging are verified. Exter
 
 | Gate | Result |
 | --- | --- |
-| Backend tests | 130 passed, including exact-page retrieval, selected-source isolation, GitHub repository ingestion, SSE, security, and website fetch regressions |
+| Backend tests | 133 passed, including exact-page retrieval, selected-source isolation, GitHub repository ingestion, HTTP 403 search fallback, SSE, security, and website fetch regressions |
 | MongoDB lifecycle | A successful ping keeps the database online even when optional index maintenance must be deferred; true outages retry automatically |
 | Python dependencies | `pip check` clean |
 | Frontend lint and TypeScript | Passed |

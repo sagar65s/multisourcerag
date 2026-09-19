@@ -53,7 +53,7 @@ async def crawl_github_repository(url: str, settings: Settings) -> list[Extracte
         path = "/".join(tail[2:])
         raw_url = f"https://raw.githubusercontent.com/{quote(owner)}/{quote(repository)}/{quote(branch)}/{quote(path, safe='/')}"
         _, text = await fetch_html(raw_url, settings, {"text/plain", "text/markdown", "application/octet-stream"})
-        return [ExtractedWebPage(url=normalize_url(url), title=f"{repository}/{path}", meta_description=f"GitHub file from {owner}/{repository}", text=text[:240_000], headings=[path])]
+        return [ExtractedWebPage(url=normalize_url(url), title=f"{repository}/{path}", meta_description=f"GitHub file from {owner}/{repository}", text=text[:240_000], headings=[path], retrieval_method="github_api")]
 
     api_root = f"https://api.github.com/repos/{quote(owner)}/{quote(repository)}"
     metadata = await _json(api_root, settings)
@@ -119,5 +119,6 @@ async def crawl_github_repository(url: str, settings: Settings) -> list[Extracte
             internal_links=[canonical, f"{canonical}/tree/{default_branch}"],
             external_links=[str(metadata.get("homepage"))] if metadata.get("homepage") else [],
             published_at=str(metadata.get("updated_at") or "")[:100] or None,
+            retrieval_method="github_api",
         )
     ]

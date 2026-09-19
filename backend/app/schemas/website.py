@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import StrEnum
 
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, Field, HttpUrl, field_validator
 
 from app.schemas.document import ProcessingStatus
 
@@ -20,6 +20,20 @@ class WebsiteCreate(BaseModel):
     max_depth: int = Field(default=2, ge=0, le=3)
     max_pages: int = Field(default=20, ge=1, le=50)
 
+    @field_validator("url", mode="before")
+    @classmethod
+    def normalize_primary_url(cls, value: object) -> object:
+        if isinstance(value, str) and "://" not in value.strip():
+            return f"https://{value.strip()}"
+        return value
+
+    @field_validator("selected_urls", mode="before")
+    @classmethod
+    def normalize_selected_urls(cls, value: object) -> object:
+        if not isinstance(value, list):
+            return value
+        return [f"https://{item.strip()}" if isinstance(item, str) and "://" not in item.strip() else item for item in value]
+
 
 class WebsiteView(BaseModel):
     id: str
@@ -37,5 +51,7 @@ class WebsiteView(BaseModel):
     internal_links: list[str] = Field(default_factory=list)
     external_links: list[str] = Field(default_factory=list)
     error_message: str | None = None
+    analysis_method: str = "direct"
+    source_notice: str | None = None
     created_at: datetime
     updated_at: datetime

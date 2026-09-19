@@ -1,3 +1,6 @@
+import json
+import os
+
 from app.core.config import Settings
 from app.providers.search.ddgs import DDGSProvider
 from app.providers.search.registry import SearchProviderRegistry
@@ -19,4 +22,3 @@ def build_search_registry(settings: Settings) -> SearchProviderRegistry:
     return registry
 import json
 import os
-
