@@ -19,6 +19,52 @@ def _normalized_host(value: str) -> str:
     return host.removeprefix("www.")
 
 
+async def resolve_website_input(value: str, settings: Settings) -> str:
+    """Resolve a plain website name while keeping URL validation centralized."""
+
+    compact = " ".join(value.split()).strip()
+    parsed = urlsplit(compact)
+    if parsed.scheme in {"http", "https"} and parsed.hostname:
+        return normalize_url(compact)
+    if "." in compact and " " not in compact:
+        return normalize_url(f"https://{compact}")
+    try:
+        _, results = await SearchProviderManager(build_search_registry(settings)).search_with_fallback(
+            f'official website for "{compact}"',
+            8,
+        )
+    except SearchProvidersUnavailable as exc:
+        raise WebsiteFetchError(
+            "Could not resolve that website name. Enter its full domain or URL instead."
+        ) from exc
+    tokens = {token for token in compact.casefold().replace("-", " ").split() if len(token) >= 3}
+    ranked: list[tuple[int, str]] = []
+    directory_hosts = {"wikipedia.org", "facebook.com", "instagram.com", "linkedin.com", "youtube.com"}
+    for result in results:
+        try:
+            candidate = normalize_url(result.url)
+        except (TypeError, ValueError):
+            continue
+        candidate_parts = urlsplit(candidate)
+        if candidate_parts.scheme in {"http", "https"} and candidate_parts.hostname:
+            host = _normalized_host(candidate)
+            title = str(result.title or "").casefold()
+            score = sum(8 for token in tokens if token in host)
+            score += sum(2 for token in tokens if token in title)
+            score += 1 if candidate_parts.scheme == "https" else 0
+            score -= max(candidate_parts.path.count("/") - 1, 0)
+            if any(host == item or host.endswith(f".{item}") for item in directory_hosts):
+                score -= 12
+            ranked.append((score, candidate))
+    if ranked:
+        score, candidate = max(ranked, key=lambda item: item[0])
+        if score > 0:
+            return candidate
+    raise WebsiteFetchError(
+        "No public website matched that name. Enter its full domain or URL instead."
+    )
+
+
 async def discover_website_from_search(url: str, settings: Settings, limit: int = 8) -> list[ExtractedWebPage]:
     """Build an honest, citable fallback from public search summaries.
 

@@ -51,8 +51,8 @@ def requested_pages(query: str) -> list[int]:
         if start < 1 or end < 1:
             continue
         low, high = sorted((start, end))
-        pages.extend(range(low, min(high, low + 7) + 1))
-    return list(dict.fromkeys(pages))[:8]
+        pages.extend(range(low, min(high, low + 19) + 1))
+    return list(dict.fromkeys(pages))[:20]
 
 
 def _is_overview_query(query: str) -> bool:
@@ -73,7 +73,7 @@ class RetrievalService:
         repository = ChunkRepository(get_database())
         pages = requested_pages(query)
         if pages:
-            exact = await repository.page_search(user_id, workspace_id, pages, document_ids, source_types, 18)
+            exact = await repository.page_search(user_id, workspace_id, pages, document_ids, source_types, 40)
             evidence = reciprocal_rank_fusion([], exact)
             return RetrievalResult(evidence, evidence_status(evidence))
         if _is_overview_query(query):

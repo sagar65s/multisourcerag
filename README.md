@@ -5,7 +5,7 @@ MultiSource AI is a lightweight, privacy-focused research assistant for chatting
 ## What is included
 
 - Document upload, OCR, chunking, embeddings, private retrieval, and citations
-- A simple **Answer from** selector for one exact PDF or indexed website
+- Ordered, responsive **Collection**, **Answer from**, and **Answer mode** controls for one exact PDF or indexed website
 - Page-aware PDF questions in English, Tamil, and Hindi (for example: `page 42`, `பக்கம் 42`, or `पृष्ठ 42`)
 - Dedicated public GitHub repository indexing for repository metadata, README, languages, license, statistics, and file tree
 - Normal AI chat, document-grounded answers, indexed website Q&A, live web search, and deep research
@@ -70,8 +70,8 @@ Open `http://localhost:3000`. Backend liveness is available at `http://localhost
 
 1. On **Dashboard**, click **Create my collection**. A collection is a private folder for related sources and chats.
 2. Use **Chat → Smart chat** for normal questions—no collection required. If selected sources contain no matching evidence, Chat gives a clearly labelled general-knowledge answer instead of stopping at an empty response.
-3. In **Documents**, select your collection, upload files, and wait for **Ready**. Click the file's **Ask** button. Chat automatically selects that exact file; use **Answer from** to change it. You can ask for any available PDF page directly, such as `Explain page 42`.
-4. In **Websites**, choose the same collection, paste either a full URL or a domain such as `chatgpt.com`, and wait for **Ready**. Public Render cold starts and transient 429/503 responses are retried. If a public site returns 403 or an anti-bot page, MultiSource AI does not bypass it: the source falls back to clearly labelled public search-visible summaries and official-domain links. Click its chat button to ask from that exact indexed source. For a public GitHub repository URL, MultiSource AI indexes repository metadata, README, languages, license, statistics, and its file tree through GitHub's public API.
+3. In **Documents**, select your collection, upload files, and wait for **Ready**. Click the file's **Ask** button. Chat automatically selects that exact file; use **Answer from** to change it. You can ask for one page or a range of up to 20 pages directly, such as `Explain page 42` or `Summarize pages 1–12`.
+4. In **Websites**, choose the same collection and enter a website name, full URL, bare domain such as `chatgpt.com`, or a public GitHub repository URL. Plain names are resolved to the most likely official public site before security validation. Public Render cold starts and transient 429/503 responses are retried. If a public site returns 403 or an anti-bot page, MultiSource AI does not bypass it: the source falls back to clearly labelled public search-visible summaries and official-domain links. Click its chat button to ask from that exact indexed source. For a public GitHub repository URL, MultiSource AI indexes repository metadata, README, languages, license, statistics, and its file tree through GitHub's public API.
 5. Use **Live web** in Chat for current facts, or **Research** for a longer cross-checked report. Completed research has a direct **Download PDF** button.
 6. The clearly labelled **Save** action under an answer adds it to **Saved**. Every conversation is automatically available in **History**. The search bar searches this history.
 

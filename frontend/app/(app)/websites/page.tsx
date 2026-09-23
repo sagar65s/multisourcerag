@@ -42,9 +42,11 @@ const labels: Record<string, string> = {
   failed: "Failed",
 };
 
-function withHttps(value: string) {
+function normalizeWebsiteInput(value: string) {
   const compact = value.trim();
-  return compact && !compact.includes("://") ? `https://${compact}` : compact;
+  if (!compact || compact.includes("://")) return compact;
+  const looksLikeAddress = compact.includes(".") || compact.startsWith("localhost");
+  return looksLikeAddress ? `https://${compact}` : compact;
 }
 
 export default function WebsitesPage() {
@@ -106,13 +108,13 @@ export default function WebsitesPage() {
     try {
       const item = await addWebsite({
         workspace_id: workspaceId,
-        url: withHttps(url),
+        url: normalizeWebsiteInput(url),
         scope,
         selected_urls:
           scope === "selected"
             ? selectedUrls
                 .split("\n")
-                .map(withHttps)
+                .map(normalizeWebsiteInput)
                 .filter(Boolean)
             : [],
         max_depth: scope === "full" ? maxDepth : 0,
@@ -201,7 +203,7 @@ export default function WebsitesPage() {
                 value={url}
                 onChange={(event) => setUrl(event.target.value)}
                 required
-                placeholder="example.com or https://example.com"
+                placeholder="Website name, domain, or GitHub repository URL"
                 aria-label="Website URL"
               />
             </div>
@@ -285,7 +287,7 @@ export default function WebsitesPage() {
               ) : (
                 <>
                   <Search size={17} />
-                  Analyze and index
+                  Find, analyze and index
                 </>
               )}
             </Button>

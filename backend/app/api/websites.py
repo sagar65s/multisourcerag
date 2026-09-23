@@ -8,6 +8,7 @@ from app.repositories.websites import WebsiteRepository
 from app.repositories.workspaces import WorkspaceRepository
 from app.schemas.website import WebsiteCreate, WebsiteView
 from app.services.website_service import delete_website, process_website
+from app.services.crawler_service import resolve_website_input
 from app.services.audit_service import audit_event
 from app.services.job_dispatcher import InProcessJobDispatcher
 from app.core.rate_limit import limiter
@@ -19,7 +20,8 @@ router = APIRouter(prefix="/websites", tags=["websites"])
 @limiter.limit("10/minute")
 async def add_website(request: Request, response: Response, payload: WebsiteCreate, background_tasks: BackgroundTasks, user: AuthenticatedUser = Depends(current_user), settings: Settings = Depends(get_settings)) -> WebsiteView:
     await WorkspaceRepository(get_database()).get_owned(user.uid, payload.workspace_id)
-    await validate_public_url(str(payload.url))
+    payload.url = await resolve_website_input(str(payload.url), settings)
+    await validate_public_url(payload.url)
     for selected in payload.selected_urls: await validate_public_url(str(selected))
     item = await WebsiteRepository(get_database()).create(user.uid, payload)
     await InProcessJobDispatcher(background_tasks).enqueue(user.uid, "website_ingestion", item.id, item.domain, process_website, user.uid, item.id, settings, workspace_id=payload.workspace_id)

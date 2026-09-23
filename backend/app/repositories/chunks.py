@@ -63,7 +63,7 @@ class ChunkRepository:
             filters["document_id"] = {"$in": document_ids}
         if source_types:
             filters["source_type"] = {"$in": source_types}
-        cursor = self.collection.find(filters, {"owner_id": 0, "workspace_id": 0, "_id": 0}).sort([("page_number", 1), ("chunk_id", 1)]).limit(min(max(limit, 1), 24))
+        cursor = self.collection.find(filters, {"owner_id": 0, "workspace_id": 0, "_id": 0}).sort([("page_number", 1), ("chunk_id", 1)]).limit(min(max(limit, 1), 40))
         items = [item async for item in cursor]
         for item in items:
             item["score"] = 10.0

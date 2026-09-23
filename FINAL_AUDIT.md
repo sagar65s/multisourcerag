@@ -1,6 +1,12 @@
 # MultiSource AI final audit
 
-Verified release audit date: 2026-09-19
+Verified release audit date: 2026-09-20
+
+## 2026-09-20 chat UI and source-answering update
+
+The chat composer now uses a responsive two-row control layout with ordered **Collection**, **Answer from**, and **Answer mode** fields. Labels and selected filenames cannot collapse into one-character columns, and native dropdown options explicitly follow the active light/dark color scheme. Existing users automatically start with their first available collection selected while normal chat remains available.
+
+Document page-range retrieval now covers up to 20 explicitly requested pages per question and reads exact selected-document chunks in page order. Grounded answers use a direct opening, short descriptive headings, concise lists, and page/source citations. Website input accepts a full URL, a bare domain, a GitHub repository URL, or a plain website name. Name resolution ranks likely official domains above directory/social results before the existing SSRF validation is applied.
 
 ## 2026-09-19 protected-website and Render update
 
@@ -24,7 +30,7 @@ Release decision: **the application code and local packaging are verified. Exter
 
 | Gate | Result |
 | --- | --- |
-| Backend tests | 133 passed, including exact-page retrieval, selected-source isolation, GitHub repository ingestion, HTTP 403 search fallback, SSE, security, and website fetch regressions |
+| Backend tests | 134 passed, including exact-page/range retrieval, selected-source isolation, website-name resolution, GitHub repository ingestion, HTTP 403 search fallback, SSE, security, and website fetch regressions |
 | MongoDB lifecycle | A successful ping keeps the database online even when optional index maintenance must be deferred; true outages retry automatically |
 | Python dependencies | `pip check` clean |
 | Frontend lint and TypeScript | Passed |

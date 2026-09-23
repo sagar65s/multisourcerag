@@ -14,7 +14,9 @@ class CrawlScope(StrEnum):
 
 class WebsiteCreate(BaseModel):
     workspace_id: str
-    url: HttpUrl
+    # A normal URL/domain is used directly. A plain website name is resolved
+    # through public search by the API before normal SSRF validation.
+    url: str = Field(min_length=2, max_length=500)
     scope: CrawlScope = CrawlScope.SINGLE
     selected_urls: list[HttpUrl] = Field(default_factory=list, max_length=25)
     max_depth: int = Field(default=2, ge=0, le=3)
@@ -23,8 +25,11 @@ class WebsiteCreate(BaseModel):
     @field_validator("url", mode="before")
     @classmethod
     def normalize_primary_url(cls, value: object) -> object:
-        if isinstance(value, str) and "://" not in value.strip():
-            return f"https://{value.strip()}"
+        if isinstance(value, str):
+            compact = " ".join(value.split())
+            if "://" not in compact and ("." in compact or compact.casefold().startswith("localhost")):
+                return f"https://{compact}"
+            return compact
         return value
 
     @field_validator("selected_urls", mode="before")

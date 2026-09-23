@@ -149,7 +149,7 @@ export function ChatExperience() {
           const requestedMode = params.get("mode") as ChatMode | null;
           const validWorkspace = items.some((item) => item.id === requestedWorkspace)
             ? requestedWorkspace
-            : "";
+            : (items[0]?.id ?? "");
           setWorkspaceId(validWorkspace);
           if (validWorkspace) await loadSources(validWorkspace);
           if (
@@ -609,10 +609,13 @@ export function ChatExperience() {
             rows={1}
           />
           <div className="composer-actions">
-            <div>
+            <div className="composer-source-controls">
               <label className="composer-select">
                 <Globe2 size={15} />
-                <span>Collection</span>
+                <span className="select-field-copy">
+                  <small>1. Collection</small>
+                  <strong>{workspaces.find((item) => item.id === workspaceId)?.name ?? "Choose collection"}</strong>
+                </span>
                 <select
                   value={workspaceId}
                   onChange={(event) => {
@@ -626,7 +629,7 @@ export function ChatExperience() {
                   aria-label="Document collection"
                   disabled={Boolean(conversationId)}
                 >
-                  <option value="">No collection</option>
+                  <option value="">Choose a collection</option>
                   {workspaces.map((item) => (
                     <option key={item.id} value={item.id}>
                       {item.name}
@@ -638,7 +641,18 @@ export function ChatExperience() {
               {workspaceId && (
                 <label className="composer-select source-select">
                   <Archive size={15} />
-                  <span>Answer from</span>
+                  <span className="select-field-copy">
+                    <small>2. Answer from</small>
+                    <strong>
+                      {sourceChoice.startsWith("document:")
+                        ? documents.find((item) => `document:${item.id}` === sourceChoice)?.original_name ?? "Selected document"
+                        : sourceChoice.startsWith("website:")
+                          ? websites.find((item) => `website:${item.id}` === sourceChoice)?.title ?? "Selected website"
+                          : mode === "website"
+                            ? "All indexed websites"
+                            : "All ready documents"}
+                    </strong>
+                  </span>
                   <select
                     value={sourceChoice}
                     onChange={(event) => {
@@ -680,7 +694,12 @@ export function ChatExperience() {
               )}
               <label className="mode-select">
                 <Sparkles size={15} />
-                <span>Mode</span>
+                <span className="select-field-copy">
+                  <small>Answer mode</small>
+                  <strong>
+                    {mode === "auto" ? "Smart chat" : mode === "general" ? "General" : mode === "knowledge" ? "Documents" : mode === "website" ? "Website" : mode === "web" ? "Live web" : "Documents + web"}
+                  </strong>
+                </span>
                 <select
                   value={mode}
                   onChange={(event) => setMode(event.target.value as ChatMode)}
@@ -696,7 +715,7 @@ export function ChatExperience() {
                 <ChevronDown size={12} />
               </label>
             </div>
-            <div>
+            <div className="composer-submit-controls">
               <label className="language-select">
                 <Languages size={15} />
                 <span>Language</span>

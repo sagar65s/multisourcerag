@@ -6958,3 +6958,235 @@ select {
 }
 .auth-page .auth-card input { min-height: 46px; font-size: 16px !important; }
 .auth-page .auth-story > p { font-size: 17px !important; line-height: 1.65; }
+
+/* Release UI guard: keep the chat controls readable, ordered and responsive. */
+.app-shell .chat-page {
+  height: calc(100dvh - 112px);
+  min-height: 620px;
+  overflow: hidden;
+}
+.app-shell .chat-header {
+  flex: none;
+  padding: 4px 4px 16px;
+}
+.app-shell .chat-canvas {
+  min-height: 220px;
+  padding-block: 22px;
+  scrollbar-gutter: stable;
+}
+.app-shell .composer-wrap {
+  flex: none;
+  width: min(940px, 100%);
+  padding: 0 12px;
+}
+.app-shell .composer {
+  padding: 14px;
+  overflow: visible;
+  background:
+    linear-gradient(var(--surface-solid), var(--surface-solid)) padding-box,
+    linear-gradient(120deg, color-mix(in srgb, var(--primary) 65%, transparent), color-mix(in srgb, var(--accent) 45%, transparent)) border-box;
+  border: 1px solid transparent;
+}
+.app-shell .composer textarea {
+  display: block;
+  min-height: 58px !important;
+  padding: 8px 10px 13px;
+}
+.app-shell .composer-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 10px 12px;
+}
+.app-shell .composer-actions > .composer-source-controls {
+  display: grid;
+  grid-template-columns: minmax(150px, .85fr) minmax(220px, 1.35fr) minmax(145px, .75fr);
+  align-items: stretch;
+  gap: 8px;
+  min-width: 0;
+}
+.app-shell .composer-actions > .composer-submit-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+  min-width: 0;
+}
+.app-shell .composer-select,
+.app-shell .mode-select,
+.app-shell .language-select {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(20px, auto);
+  align-items: center;
+  column-gap: 9px !important;
+  row-gap: 1px;
+  width: 100%;
+  min-width: 0;
+  min-height: 54px !important;
+  height: auto;
+  padding: 7px 10px !important;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--surface-raised);
+  color: var(--text);
+  overflow: hidden;
+}
+.app-shell .composer-select:focus-within,
+.app-shell .mode-select:focus-within {
+  border-color: color-mix(in srgb, var(--primary) 62%, var(--line));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 10%, transparent);
+}
+.app-shell .composer-select > svg:first-child,
+.app-shell .mode-select > svg:first-child {
+  grid-column: 1;
+  grid-row: 1 / 3;
+  color: var(--primary);
+  flex: none;
+}
+.app-shell .composer-select > svg:last-child,
+.app-shell .mode-select > svg:last-child {
+  grid-column: 3;
+  grid-row: 1 / 3;
+  color: var(--muted);
+  pointer-events: none;
+}
+.app-shell .select-field-copy {
+  grid-column: 2;
+  grid-row: 1;
+  display: block !important;
+  min-width: 0;
+  line-height: 1 !important;
+  pointer-events: none;
+}
+.app-shell .select-field-copy small {
+  display: block;
+  color: var(--muted);
+  font-size: 10px !important;
+  font-weight: 750;
+  letter-spacing: .025em;
+  white-space: nowrap;
+}
+.app-shell .select-field-copy strong { display: none; }
+.app-shell .composer-select select,
+.app-shell .mode-select select {
+  grid-column: 2;
+  grid-row: 2;
+  display: block;
+  width: 100%;
+  max-width: none !important;
+  min-width: 0;
+  min-height: 22px !important;
+  height: 22px;
+  padding: 0 20px 0 0;
+  border: 0;
+  outline: 0;
+  appearance: none;
+  background: transparent;
+  color: var(--text) !important;
+  font-size: 13px !important;
+  font-weight: 760;
+  line-height: 22px !important;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  cursor: pointer;
+}
+.app-shell select { color-scheme: light; }
+.dark .app-shell select { color-scheme: dark; }
+.app-shell select option,
+.app-shell select optgroup {
+  background: #ffffff;
+  color: #141524;
+  font-size: 14px;
+}
+.dark .app-shell select option,
+.dark .app-shell select optgroup {
+  background: #191a28;
+  color: #f4f2ff;
+}
+.app-shell .language-select {
+  display: flex;
+  width: auto;
+  min-height: 44px !important;
+  padding: 0 8px !important;
+  border-color: transparent;
+  background: transparent;
+}
+.app-shell .language-select > span { display: none !important; }
+.app-shell .language-select select {
+  max-width: 72px !important;
+  min-height: 40px !important;
+  color: var(--text) !important;
+  font-size: 13px !important;
+}
+.app-shell .composer-submit-controls .button {
+  flex: none;
+  width: 44px;
+  height: 44px;
+}
+.app-shell .message-answer {
+  border-radius: 8px 18px 18px 18px;
+  padding: 18px 20px;
+  box-shadow: 0 10px 28px color-mix(in srgb, var(--text) 5%, transparent);
+}
+.app-shell .assistant-content :where(h1, h2, h3) {
+  line-height: 1.3;
+  margin: 20px 0 9px;
+}
+.app-shell .assistant-content h1 { font-size: 21px !important; }
+.app-shell .assistant-content h2 { font-size: 18px !important; }
+.app-shell .assistant-content h3 { font-size: 16px !important; }
+.app-shell .assistant-content :where(ul, ol) { margin-block: 10px; }
+.app-shell .assistant-content li + li { margin-top: 6px; }
+.app-shell .website-card,
+.app-shell .document-row,
+.app-shell .message-answer,
+.app-shell .composer {
+  animation: release-rise .35s cubic-bezier(.22, 1, .36, 1) both;
+}
+@keyframes release-rise {
+  from { opacity: 0; transform: translateY(7px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 1120px) {
+  .app-shell .composer-actions {
+    grid-template-columns: 1fr;
+  }
+  .app-shell .composer-submit-controls {
+    justify-self: end;
+  }
+}
+@media (max-width: 760px) {
+  .app-shell .chat-page {
+    height: auto;
+    min-height: calc(100dvh - 92px);
+    overflow: visible;
+  }
+  .app-shell .chat-header { align-items: flex-start; }
+  .app-shell .privacy-state { display: none; }
+  .app-shell .chat-canvas { min-height: 360px; padding: 20px 0; overflow: visible; }
+  .app-shell .composer-wrap { padding: 0; }
+  .app-shell .composer-actions > .composer-source-controls {
+    grid-template-columns: 1fr 1fr;
+  }
+  .app-shell .mode-select { grid-column: 1 / -1; }
+}
+@media (max-width: 520px) {
+  .app-shell .composer { padding: 11px; border-radius: 17px; }
+  .app-shell .composer-actions > .composer-source-controls { grid-template-columns: 1fr; }
+  .app-shell .mode-select { grid-column: auto; }
+  .app-shell .composer-submit-controls { width: 100%; justify-content: flex-end; }
+  .app-shell .language-select { margin-right: auto; }
+  .app-shell .chat-welcome h2 { font-size: 29px !important; }
+  .app-shell .message { grid-template-columns: 32px minmax(0, 1fr); gap: 9px; }
+  .app-shell .message-answer { padding: 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-shell .website-card,
+  .app-shell .document-row,
+  .app-shell .message-answer,
+  .app-shell .composer { animation: none; }
+}

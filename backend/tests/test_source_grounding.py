@@ -12,7 +12,7 @@ def test_page_references_support_single_page_and_bounded_ranges() -> None:
     assert requested_pages("பக்கம் 42-ல் என்ன உள்ளது?") == [42]
     assert requested_pages("पृष्ठ 12 समझाइए") == [12]
     assert requested_pages("Compare pages 3-6") == [3, 4, 5, 6]
-    assert requested_pages("Read pages 1 through 40") == list(range(1, 9))
+    assert requested_pages("Read pages 1 through 40") == list(range(1, 21))
 
 
 def test_chat_request_accepts_separate_document_and_website_selection() -> None:
@@ -73,5 +73,6 @@ async def test_page_question_reads_exact_selected_document_page(monkeypatch) -> 
     assert captured["pages"] == [42]
     assert captured["ids"] == ["doc-7"]
     assert captured["types"] == ["document"]
+    assert captured["limit"] == 40
     assert result.evidence[0].page_number == 42
     assert "exact content" in result.evidence[0].text
