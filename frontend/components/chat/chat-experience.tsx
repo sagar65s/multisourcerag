@@ -88,6 +88,7 @@ export function ChatExperience() {
   const [websites, setWebsites] = useState<WebsiteSource[]>([]);
   const [sourceChoice, setSourceChoice] = useState("all");
   const [mode, setMode] = useState<ChatMode>("auto");
+  const [topK, setTopK] = useState(6);
   const [language, setLanguage] = useState<"English" | "Tamil" | "Hindi">(
     "English",
   );
@@ -278,6 +279,7 @@ export function ChatExperience() {
         conversationId,
         selectedDocumentIds,
         selectedWebsiteIds,
+        topK,
       );
     } catch (reason) {
       if (!abort.signal.aborted) {
@@ -707,10 +709,27 @@ export function ChatExperience() {
                 >
                   <option value="auto">Smart chat</option>
                   <option value="general">General only</option>
-                  <option value="knowledge">My documents</option>
+                  <option value="knowledge">My documents (strict)</option>
                   <option value="website">Indexed website</option>
                   <option value="web">Live web</option>
                   <option value="both">Both</option>
+                </select>
+                <ChevronDown size={12} />
+              </label>
+              <label className="mode-select top-k-select">
+                <Sparkles size={15} />
+                <span className="select-field-copy">
+                  <small>Top-K evidence</small>
+                  <strong>{topK} best chunks</strong>
+                </span>
+                <select
+                  value={topK}
+                  onChange={(event) => setTopK(Number(event.target.value))}
+                  aria-label="Top K evidence chunks"
+                >
+                  {[3, 6, 8, 12, 20].map((value) => (
+                    <option key={value} value={value}>{value} best chunks</option>
+                  ))}
                 </select>
                 <ChevronDown size={12} />
               </label>

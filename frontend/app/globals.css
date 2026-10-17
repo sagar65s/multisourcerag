@@ -7000,7 +7000,7 @@ select {
 }
 .app-shell .composer-actions > .composer-source-controls {
   display: grid;
-  grid-template-columns: minmax(150px, .85fr) minmax(220px, 1.35fr) minmax(145px, .75fr);
+  grid-template-columns: minmax(145px, .8fr) minmax(200px, 1.25fr) minmax(135px, .7fr) minmax(125px, .65fr);
   align-items: stretch;
   gap: 8px;
   min-width: 0;
@@ -7172,7 +7172,7 @@ select {
   .app-shell .composer-actions > .composer-source-controls {
     grid-template-columns: 1fr 1fr;
   }
-  .app-shell .mode-select { grid-column: 1 / -1; }
+  .app-shell .mode-select { grid-column: auto; }
 }
 @media (max-width: 520px) {
   .app-shell .composer { padding: 11px; border-radius: 17px; }

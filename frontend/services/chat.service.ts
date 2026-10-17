@@ -14,6 +14,7 @@ export async function streamChat(
   conversationId?: string | null,
   documentIds: string[] = [],
   websiteIds: string[] = [],
+  topK = 6,
 ): Promise<void> {
   const token = await (await getAuthenticatedUser())?.getIdToken();
   if (!token) throw new Error("Please sign in before starting a private chat.");
@@ -31,6 +32,7 @@ export async function streamChat(
       conversation_id: conversationId || null,
       document_ids: documentIds.length ? documentIds : null,
       website_ids: websiteIds.length ? websiteIds : null,
+      top_k: topK,
     }),
     signal,
   });

@@ -64,7 +64,17 @@ class RetrievalService:
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
 
-    async def retrieve(self, user_id: str, workspace_id: str, query: str, document_ids: list[str] | None = None, source_types: list[str] | None = None) -> RetrievalResult:
+    async def retrieve(
+        self,
+        user_id: str,
+        workspace_id: str,
+        query: str,
+        document_ids: list[str] | None = None,
+        source_types: list[str] | None = None,
+        top_k: int | None = None,
+    ) -> RetrievalResult:
+        evidence_limit = min(max(top_k or self.settings.reranked_evidence_limit, 1), 20)
+        candidate_limit = min(max(self.settings.retrieval_candidates, evidence_limit * 3), 30)
         filters: dict = {"owner_id": user_id, "workspace_id": workspace_id}
         if document_ids: filters["document_id"] = {"$in": document_ids}
         if source_types: filters["source_type"] = {"$in": source_types}
@@ -73,22 +83,23 @@ class RetrievalService:
         repository = ChunkRepository(get_database())
         pages = requested_pages(query)
         if pages:
-            exact = await repository.page_search(user_id, workspace_id, pages, document_ids, source_types, 40)
-            evidence = reciprocal_rank_fusion([], exact)
+            page_limit = min(max(evidence_limit, len(pages)), 40)
+            exact = await repository.page_search(user_id, workspace_id, pages, document_ids, source_types, page_limit)
+            evidence = reciprocal_rank_fusion([], exact)[:page_limit]
             return RetrievalResult(evidence, evidence_status(evidence))
         if _is_overview_query(query):
-            overview = await repository.overview_search(user_id, workspace_id, document_ids, source_types, 12)
-            evidence = reciprocal_rank_fusion([], overview)
+            overview = await repository.overview_search(user_id, workspace_id, document_ids, source_types, evidence_limit)
+            evidence = reciprocal_rank_fusion([], overview)[:evidence_limit]
             return RetrievalResult(evidence, evidence_status(evidence))
         vector = (await EmbeddingService(self.settings.embedding_model, self.settings.embedding_batch_size).embed([query]))[0]
-        dense_task = VectorStore(self.settings).search(user_id, workspace_id, vector, document_ids, source_types, self.settings.retrieval_candidates)
-        keyword_task = repository.keyword_search(user_id, workspace_id, query, document_ids, source_types, self.settings.retrieval_candidates)
+        dense_task = VectorStore(self.settings).search(user_id, workspace_id, vector, document_ids, source_types, candidate_limit)
+        keyword_task = repository.keyword_search(user_id, workspace_id, query, document_ids, source_types, candidate_limit)
         dense_result, keyword_result = await asyncio.gather(dense_task, keyword_task, return_exceptions=True)
         dense = [] if isinstance(dense_result, BaseException) else dense_result
         keyword = [] if isinstance(keyword_result, BaseException) else keyword_result
         fused = reciprocal_rank_fusion(dense, keyword)
         if not fused:
-            overview = await repository.overview_search(user_id, workspace_id, document_ids, source_types, self.settings.reranked_evidence_limit)
+            overview = await repository.overview_search(user_id, workspace_id, document_ids, source_types, evidence_limit)
             fused = reciprocal_rank_fusion([], overview)
-        reranked = await RerankerService(self.settings.reranker_model).rerank(query, fused[: self.settings.retrieval_candidates], self.settings.reranked_evidence_limit)
+        reranked = await RerankerService(self.settings.reranker_model).rerank(query, fused[:candidate_limit], evidence_limit)
         return RetrievalResult(reranked, evidence_status(reranked))

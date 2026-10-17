@@ -13,6 +13,7 @@ class ChatRequest(BaseModel):
     workspace_id: str | None = None
     document_ids: list[str] | None = Field(default=None, max_length=25)
     website_ids: list[str] | None = Field(default=None, max_length=25)
+    top_k: int = Field(default=6, ge=1, le=20)
     language: str = Field(default="English", pattern="^(English|Tamil|Hindi)$")
 
 

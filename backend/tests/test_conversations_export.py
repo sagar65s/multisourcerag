@@ -16,7 +16,7 @@ from app.repositories.saved import SavedRepository
 from app.schemas.chat import ChatRequest
 from app.rag.query_router import QueryMode
 from app.services.export_service import _docx, _markdown_html, _pdf, _plain
-from app.api.chat import stream_chat
+from app.api.chat import _document_only_notice, stream_chat
 
 
 @pytest.mark.asyncio
@@ -80,6 +80,68 @@ def test_stream_generator_does_not_shadow_routed_mode() -> None:
     source = inspect.getsource(stream_chat)
     assert "resolved_mode = mode" in source
     assert re.search(r"^\s*mode\s*=\s*QueryMode", source, re.MULTILINE) is None
+
+
+def test_document_only_notice_never_offers_general_answer() -> None:
+    message = _document_only_notice("English")
+    assert "does not contain enough information" in message
+    assert "did not add a general-knowledge answer" in message
+
+
+def test_document_mode_has_no_general_fallback_path() -> None:
+    source = inspect.getsource(stream_chat)
+    assert "if strict_document_only:" in source
+    assert "document-retrieval" in source
+    assert "if not strict_document_only else []" in source
+
+
+@pytest.mark.asyncio
+async def test_document_mode_without_evidence_never_calls_general_provider(monkeypatch) -> None:
+    class Repository:
+        async def create(self, *_args):
+            return SimpleNamespace(id="conversation-1")
+
+        async def add_message(self, *_args):
+            return SimpleNamespace(id="message-1")
+
+    class Workspaces:
+        def __init__(self, _database):
+            pass
+
+        async def get_owned(self, *_args):
+            return {"_id": "workspace-1"}
+
+    class Retrieval:
+        def __init__(self, _settings):
+            pass
+
+        async def retrieve(self, *_args):
+            return SimpleNamespace(evidence=[], status="no_evidence")
+
+    class ProviderManager:
+        def __init__(self, _registry):
+            raise AssertionError("Document-only no-evidence flow must not call an LLM provider")
+
+    monkeypatch.setattr("app.api.chat.get_database", lambda: object())
+    monkeypatch.setattr("app.api.chat.ConversationRepository", lambda _database: Repository())
+    monkeypatch.setattr("app.api.chat.WorkspaceRepository", Workspaces)
+    monkeypatch.setattr("app.api.chat.RetrievalService", Retrieval)
+    monkeypatch.setattr("app.api.chat.LLMProviderManager", ProviderManager)
+
+    endpoint = inspect.unwrap(stream_chat)
+    request = Request({"type": "http", "method": "POST", "path": "/api/v1/chat/stream", "headers": []})
+    result = await endpoint(
+        request=request,
+        response=Response(),
+        payload=ChatRequest(query="Who founded it?", mode=QueryMode.KNOWLEDGE, workspace_id="workspace-1"),
+        user=AuthenticatedUser(uid="user-1", email=None, is_admin=False),
+        settings=Settings(),
+    )
+    chunks = [chunk async for chunk in result.body_iterator]
+    stream = "".join(chunk.decode() if isinstance(chunk, bytes) else chunk for chunk in chunks)
+    assert "does not contain enough information" in stream
+    assert '"evidence_status": "no_evidence"' in stream
+    assert "general_answer" not in stream
 
 
 @pytest.mark.asyncio
